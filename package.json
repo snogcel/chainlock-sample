@@ -1,0 +1,23 @@
+{
+  "name": "chainlock-sample",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snogcel/chainlock-sample.git"
+  },
+  "author": "Jon Kindel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/snogcel/chainlock-sample/issues"
+  },
+  "homepage": "https://github.com/snogcel/chainlock-sample#readme",
+  "dependencies": {
+    "zeromq": "^5.1.0"
+  }
+}
