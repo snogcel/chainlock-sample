@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/snogcel/chainlock-sample#readme",
   "dependencies": {
+    "@dashevo/dashcore-lib": "^0.17.3",
+    "@dashevo/dashd-rpc": "^1.3.0",
     "zeromq": "^5.1.0"
   }
 }
