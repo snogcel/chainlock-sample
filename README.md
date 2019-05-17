@@ -1,1 +1,1 @@
-# chainlock-sample
+# Sample Integration (ChainLock)

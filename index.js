@@ -1,8 +1,14 @@
 const zmq = require('zeromq');
 const Dashcore = require('@dashevo/dashcore-lib');
+const RpcClient = require('@dashevo/dashd-rpc');
 
-const socket = zmq.socket('sub');
-socket.connect('tcp://127.0.0.1:28332'); // connect to Dash Core daemon using the following configuration...
+let config = {
+    protocol: 'http',
+    user: 'dash',
+    pass: 'local321',
+    host: '127.0.0.1',
+    port: 19998
+};
 
 /*
 
@@ -10,44 +16,46 @@ socket.connect('tcp://127.0.0.1:28332'); // connect to Dash Core daemon using th
 
 server=1
 testnet=1
-zmqpubrawtx=tcp://127.0.0.1:28332
-zmqpubrawblock=tcp://127.0.0.1:28332
+rpcuser=dash
+rpcpassword=local321
+zmqpubrawchainlock=tcp://127.0.0.1:28332
 
  */
 
-socket.subscribe('rawblock'); // subscribe to "zmqpubrawblock"
+const rpc = new RpcClient(config); // connect to Dash Core daemon using JSON-RPC
 
-socket.subscribe('rawtx'); // subscribe to "zmqpubrawtx"
+const socket = zmq.socket('sub');
 
-console.log('Connected to daemon using port 28332');
+socket.connect('tcp://127.0.0.1:28332'); // connect to Dash Core daemon using ZMQ Notification
+socket.subscribe('rawchainlock'); // subscribe to "rawchainlock"
 
-socket.on('message', function(topic, message) {
+// Fetch Chain Tip from Dash Core Daemon using JSON-RPC
+rpc.getBestBlockHash(function (err, res) {
+    if (res.result) {
+        rpc.getBlock(res.result, function(err, res) {
 
-    let zmqpub = topic.toString();
+            console.log("starting block height:", res.result.height);
+            console.log("");
+            console.log("hash:", res.result.hash);
+            console.log("chainlock:", res.result.chainlock);
+            console.log("");
 
-    switch(zmqpub) {
-
-        case 'rawblock':
-
-            let block = new Dashcore.Block(message);
-
-            console.log('rawblock:', block.toJSON());
-
-            break;
-
-
-        case 'rawtx':
-
-            let tx = new Dashcore.Transaction(message);
-
-            console.log('rawtx:', tx.toJSON());
-
-            break;
-
-
-        default:
-
-            console.log("unknown message received.");
+        });
     }
+});
 
+// Handle ChainLock Notification using ZMQ
+socket.on('message', function(topic, message) {
+    if (topic.toString() === 'rawchainlock') {
+
+        let block = new Dashcore.Block(message);
+
+        let chainTip = block.toJSON();
+
+        console.log("* zmq notification: rawchainlock *");
+        console.log("hash:", chainTip.header.hash);
+        console.log("previous hash:", chainTip.header.prevHash);
+        console.log("");
+
+    }
 });
